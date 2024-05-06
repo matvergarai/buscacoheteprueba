@@ -1,0 +1,105 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  .container {
+    max-width: 600px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  h2 {
+    color: #555;
+  }
+  
+  /* Mensaje de bienvenida */
+  #welcomeMessage {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Perfil activo */
+  #activeProfileName {
+    font-weight: bold;
+    color: #007bff;
+  }
+  
+  /* Lista de perfiles de navegación */
+  #navigationProfileList {
+    list-style: none;
+    padding: 0;
+  }
+  
+  #navigationProfileList li {
+    margin-bottom: 10px;
+  }
+  
+  /* Campo de entrada para nombre del perfil */
+  #navigationProfileNameInput {
+    width: calc(100% - 100px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  /* Botón para agregar perfil */
+  #addProfileButton {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  #addProfileButton:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Botón para crear nuevo perfil */
+  #newProfileSection {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  #profileNameInput {
+    width: calc(100% - 130px);
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  #addNavigationProfileButton {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  #addNavigationProfileButton:hover {
+    background-color: #218838;
+  }
+  

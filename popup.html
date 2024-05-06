@@ -7,16 +7,39 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="loginForm">
-    <h1>Iniciar sesión</h1>
-    <form id="login">
-      <input type="text" id="username" placeholder="Usuario">
-      <input type="password" id="password" placeholder="Contraseña">
-      <input type="submit" value="Iniciar sesión">
-    </form>
+  <!-- Agregar un elemento para mostrar el perfil activo -->
+  <div id="activeProfileSection">
+    <h2>Perfil Activo:</h2>
+    <p id="activeProfileName">Cargando...</p>
   </div>
-  
-  <div id="result"></div>
-  <script src="popup.js"></script>
+
+  <div id="popupContainer">
+    <div id="contenedorLogin">
+      <div id="loginForm">
+        <h1>Iniciar sesión</h1>
+        <form id="login">
+          <input type="text" id="username" placeholder="Usuario">
+          <input type="password" id="password" placeholder="Contraseña">
+          <input type="submit" value="Iniciar sesión">
+        </form>
+        <div id="result"></div>
+      </div>
+
+      <!-- Enlace para redirigir al formulario de registro -->
+      <div class="registro-link">
+        <a href="registro.html">¿No tienes una cuenta? Regístrate aquí.</a>
+      </div>
+
+      <div id="blockedWebsitesDiv"></div>
+
+      <!-- Enlace para redirigir al formulario de recuperación de contraseña -->
+      <div class="forgot-password-link">
+        <a href="forgot-password.html">¿Olvidaste tu contraseña?</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cargar el archivo JavaScript -->
+  <script src="popup.js" defer></script>
 </body>
 </html>

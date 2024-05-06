@@ -1,12 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Usuario</title>
+  <title>Panel de Administración</title>
+  <link rel="stylesheet" type="text/css" href="./panel.css" media="screen" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 </head>
 <body>
-  <h1>Bienvenido al Panel de Usuario</h1>
-  <!-- Aquí puedes agregar la interfaz del panel de usuario -->
+  <div id="app">
+    <div id="header-container">
+      <section class="header">
+        <h1>BuscaCohete URL Blocker</h1>
+        <h1 id="welcomeMessage">Bienvenido al panel de <span id="activeProfileName"></span></h1>
+      </section>
+    </div>
+    <div id="content-container">
+      <!-- Sección "Agregar a la lista de bloqueos" -->
+      <section class="add-block">
+        <h2>Agregar a la lista de bloqueos</h2>
+        <div class="main">
+          <input type="text" id="websiteInput"><button class="block" id="blockButton">Bloquear</button>
+        </div>
+      </section>
+
+      <!-- Sección "Sitios Bloqueados" -->
+      <section class="remove-block">
+        <h2>Sitios Bloqueados</h2>
+        <div class="main" id="blockedWebsitesDiv">
+          <ul id="blockedWebsitesList"></ul>
+        </div>
+      </section>
+
+      <!-- Sección "Buscar URLs" -->
+      <section class="buscar-urls">
+        <h2>Buscar URLs</h2>
+        <div class="main">
+          <form id="buscar-formulario">
+            <label for="tema">Introduce el tema:</label>
+            <input type="text" id="tema" name="tema" required>
+            <button type="submit" id="buscarBtn">Buscar</button>
+          </form>
+          <div id="resultados"></div>
+        </div>
+      </section>
+      
+      <!-- Panel de Historial de Navegación -->
+      <section id="navigationHistory">
+        <h2>Historial de Navegación</h2>
+        <table id="historyTable">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>URL</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </div>
+  </div>
+  <input type="hidden" id="perfilActual" value="">
+  <script src="./panel.js"></script>
 </body>
 </html>

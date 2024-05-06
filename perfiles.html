@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear Perfiles</title>
+  <link rel="stylesheet" href="perfiles.css">
+</head>
+<body>
+  <h1>Crear Perfiles</h1>
+  
+
+  <!-- Mensaje de bienvenida con el perfil activo -->
+  <!-- El div para mostrar el mensaje de bienvenida -->
+  <div id="welcomeMessage"></div>
+
+  <!-- Perfil activo -->
+  
+  <div id="profileStatusMessage"></div>
+
+  <!-- Perfil de navegación -->
+  <h2>Perfiles de Navegación:</h2>
+  <div id="navigationProfilesMessage"></div>
+  <ul id="navigationProfileList">
+    <!-- Aquí se mostrarán los perfiles de navegación existentes -->
+  </ul>
+   
+  <h2>Crea un nuevo perfil:</h2>
+  <!-- Campo de entrada para el nombre del perfil de navegación -->
+  <input type="text" id="navigationProfileNameInput" placeholder="Nombre del perfil de navegación">
+  <button id="addProfileButton">Agregar Perfil</button>
+  
+  <!-- Botón para crear nuevo perfil de navegación -->
+  <div id="newProfileSection" style="display: none;">
+    <input type="text" id="profileNameInput" placeholder="Nombre del Perfil">
+    <button id="addNavigationProfileButton">Crear nuevo perfil de navegación</button>
+  </div>
+
+  <script src="perfiles.js"></script>
+</body>
+</html>
