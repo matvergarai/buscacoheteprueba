@@ -42,8 +42,8 @@ const usuarioSchema = new mongoose.Schema({
   password: String,
    
   navigationProfiles: [navigationProfileSchema],
-   resetPasswordToken: { type: String, default: null }, // Establecer un valor predeterminado
-  resetPasswordExpires: { type: Date, default: null }
+   resetPasswordToken: { type: String, default: null } // Establecer un valor predeterminado
+  
 });
 
 const Usuario = mongoose.model('Usuario', usuarioSchema);
@@ -302,36 +302,38 @@ app.post('/unblock-website/:username/:profileName', async (req, res) => {
   }
 });
 
+const generarToken = () => {
+  return crypto.randomBytes(20).toString('hex'); // Genera un token único de 20 bytes en formato hexadecimal
+};
 
+function generarYGuardarTokenRecuperacion(email) {
+  const tokenRecuperacion = generarToken(); // Generar un token único
+  const resetPasswordExpires = Date.now() + 3600000; // Establecer la fecha de vencimiento del token (1 hora en este ejemplo)
 
-function generarToken() {
-  return crypto.randomBytes(20).toString('hex');
+  Usuario.findOneAndUpdate({ email: email }, { resetPasswordToken: tokenRecuperacion, resetPasswordExpires: resetPasswordExpires })
+      .then(usuario => {
+          if (!usuario) {
+              console.log("No se encontró ningún usuario con este correo electrónico.");
+              return; // Si no se encuentra el usuario, no se guarda el token
+          }
+          console.log("Token de recuperación generado y guardado en el usuario:", tokenRecuperacion);
+      })
+      .catch(error => {
+          console.error('Error al guardar el token de recuperación en el usuario:', error);
+      });
 }
+
+
 
 // Ruta para solicitar restablecimiento de contraseña
 app.post('/forgot-password', (req, res) => {
   const { email } = req.body;
-  
-  const token = generarToken(); // Generar un token único
-  const resetPasswordExpires = Date.now() + 3600000; // Establecer la fecha de vencimiento del token (1 hora en este ejemplo)
 
-  Usuario.findOneAndUpdate({ email: email }, { resetPasswordToken: token, resetPasswordExpires: resetPasswordExpires })
-    .then(usuario => {
-      if (!usuario) {
-        return res.status(404).json({ success: false, message: 'No se encontró ningún usuario con este correo electrónico' });
-      }
+  // Generar y guardar el token de recuperación en el usuario
+  generarYGuardarTokenRecuperacion(email);
 
-      // Envío del token al usuario (puedes implementar esta función)
-      enviarTokenPorCorreo(email, token);
-
-      console.log("Token generado y almacenado:", token); // Agrega este console.log para verificar el token generado y almacenado
-
-      res.json({ success: true, message: 'Se ha enviado un correo electrónico con un enlace para restablecer la contraseña' });
-    })
-    .catch(error => {
-      console.error('Error al buscar usuario:', error);
-      res.status(500).json({ success: false, message: 'Error en el servidor' });
-    });
+  // Envía la respuesta al cliente
+  res.json({ success: true, message: 'Se ha enviado un correo electrónico con un enlace para restablecer la contraseña' });
 });
 
 // Ruta para restablecer la contraseña

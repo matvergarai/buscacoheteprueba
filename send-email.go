@@ -1,22 +1,30 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/smtp"
 	"os"
 	"path/filepath"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
 var (
-	googleOauthConfig *oauth2.Config
-	oauthStateString  = "pseudo-random"
+	googleOauthConfig  *oauth2.Config
+	oauthStateString   = "pseudo-random"
+	usuariosCollection *mongo.Collection
 )
 
 const htmlIndex = `<html><body>
@@ -32,6 +40,16 @@ func init() {
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
 		Endpoint:     google.Endpoint,
 	}
+
+	// Configuración de la conexión a MongoDB
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil {
+		log.Fatal("Error de conexión a MongoDB:", err)
+	}
+
+	usuariosDB := client.Database("usuarios")
+	usuariosCollection = usuariosDB.Collection("usuarios")
 }
 
 func main() {
@@ -40,8 +58,8 @@ func main() {
 	http.HandleFunc("/logout", handleLogout)
 	http.HandleFunc("/callback", handleGoogleCallback)
 	http.HandleFunc("/reset-password", handlePasswordReset)
-	http.HandleFunc("/reset_password.html", handleResetPasswordHTML) // Ajuste en la ruta
-	http.HandleFunc("/reset_password.js", handleResetPasswordJS)     // Ajuste en la ruta
+	http.HandleFunc("/reset_password.html", handleResetPasswordHTML)
+	http.HandleFunc("/reset_password.js", handleResetPasswordJS)
 
 	// Directorio para servir archivos estáticos
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
@@ -125,8 +143,16 @@ func handlePasswordReset(w http.ResponseWriter, r *http.Request) {
 	// Lógica para generar un token de restablecimiento de contraseña
 	token := generarToken()
 
+	// Guardar el token en el campo resetPasswordToken del usuario correspondiente
+	err := guardarTokenUsuario(email, token)
+	if err != nil {
+		fmt.Println("Error al guardar el token del usuario:", err)
+		http.Error(w, "Error al guardar el token del usuario", http.StatusInternalServerError)
+		return
+	}
+
 	// Envío de correo electrónico
-	err := enviarCorreo(email, token)
+	err = enviarCorreo(email, token)
 	if err != nil {
 		fmt.Println("Error al enviar el correo electrónico:", err)
 		http.Error(w, "Error al enviar el correo electrónico", http.StatusInternalServerError)
@@ -245,4 +271,28 @@ func addCORSHeaders(handler http.Handler) http.Handler {
 		// Continuar con el siguiente manejador
 		handler.ServeHTTP(w, r)
 	})
+}
+
+func guardarTokenUsuario(email, token string) error {
+	// Establecer la fecha de expiración del token
+	expirationTime := time.Now().Add(24 * time.Hour)
+
+	// Filtrar el usuario por su dirección de correo electrónico
+	filter := bson.M{"email": email}
+
+	// Crear un documento de actualización para establecer el token y la fecha de expiración
+	update := bson.M{
+		"$set": bson.M{
+			"resetPasswordToken":      token,
+			"resetPasswordExpiration": expirationTime,
+		},
+	}
+
+	// Actualizar el usuario en la base de datos
+	_, err := usuariosCollection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
