@@ -97,17 +97,17 @@ async function showActiveProfile() {
     const activeProfileNameElement = document.getElementById("activeProfileName");
 
     if (activeProfileNameElement) {
-        const currentUser = await getCurrentUser();
-        const activeProfile = await getActiveProfile(currentUser);
+        chrome.storage.local.get("activeProfile", function(data) {
+            const activeProfile = data.activeProfile;
 
-        if (activeProfile && activeProfile.username) {
-            activeProfileNameElement.textContent = activeProfile.username;
-            console.log("Perfil activo encontrado:", activeProfile);
-            console.log("URLs bloqueadas del perfil activo (almacenamiento sincronizado):", activeProfile.blockedWebsitesArray);
-        } else {
-            activeProfileNameElement.textContent = "Ninguno";
-            console.log("No hay ningún perfil activo.");
-        }
+            if (activeProfile && activeProfile.name) {
+                activeProfileNameElement.textContent = activeProfile.name;
+                console.log("Perfil activo encontrado:", activeProfile);
+            } else {
+                activeProfileNameElement.textContent = "Ninguno"; // Si no hay perfil activo, muestra "Ninguno"
+                console.log("No hay ningún perfil activo.");
+            }
+        });
     } else {
         console.error("El elemento 'activeProfileName' no fue encontrado en el DOM.");
     }

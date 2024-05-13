@@ -1,139 +1,116 @@
+/* Estilos generales */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f9ecd3;
+  background-color: #f5f5f5;
+  color: #333;
 }
 
-#app {
+.container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
 
-#header-container {
-  text-align: center;
-  margin-bottom: 20px;
+h1, h2, h3 {
+  margin-top: 0;
 }
 
-.header h1 {
-  font-size: 24px;
-  margin: 0;
-  color: #333;
-}
-
-.main {
-  margin-bottom: 20px;
-}
-
-.add-block input[type="text"] {
-  padding: 10px;
-  width: calc(100% - 120px);
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.add-block button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.add-block button:hover {
-  background-color: #45a049;
-}
-
-.remove-block #blockedWebsitesDiv {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.buscar-urls form {
-  margin-bottom: 10px;
-}
-
-.buscar-urls label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-.buscar-urls input[type="text"] {
-  padding: 10px;
-  width: calc(100% - 140px);
-  border: 1px solid #ccc;
-  border-radius: 4px 0 0 4px;
-}
-
-.buscar-urls button {
-  padding: 10px 20px;
-  background-color: #008CBA;
-  color: white;
-  border: none;
-  border-radius: 0 4px 4px 0;
-  cursor: pointer;
-}
-
-.buscar-urls button:hover {
-  background-color: #0073e6;
-}
-
-#resultados {
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 4px;
-}
-
-.history {
+/* Estilos para el panel de bloqueo */
+#addBlockedUrlForm {
   margin-top: 20px;
 }
 
-#historyList {
-  list-style-type: none;
-  padding: 0;
-}
-
-#historyList li {
-  margin-bottom: 5px;
-}
-
-#resultados {
-  border: 1px solid #ccc;
+#blockedUrlInput {
+  width: 70%;
   padding: 10px;
-  border-radius: 4px;
-  margin-top: 20px; /* Agregado margen superior para separar del resto del contenido */
+  font-size: 16px;
 }
 
-#resultados ul {
-  list-style-type: none; /* Quitamos el estilo de viñetas */
-  padding: 0;
-}
-
-#resultados li {
-  margin-bottom: 10px; /* Espaciado entre elementos de la lista */
-}
-
-#resultados a {
-  color: #0073e6; /* Color del enlace */
-  text-decoration: none; /* Quitamos el subrayado del enlace */
-}
-
-#resultados a:hover {
-  text-decoration: underline; /* Subrayado al pasar el ratón sobre el enlace */
-}
-
-#resultados button {
-  padding: 5px 10px;
-  background-color: #4CAF50;
+#bloquearUrlBtn {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
 }
 
-#resultados button:hover {
-  background-color: #45a049;
+#blockedUrlsList {
+  margin-top: 20px;
+}
+
+#blockedUrlsList li {
+  margin-bottom: 10px;
+}
+
+#blockedUrlsList button {
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#blockedUrlsList button:hover {
+  background-color: #d32f2f;
+}
+
+/* Estilos para la búsqueda por tema */
+#buscarForm {
+  margin-top: 40px;
+}
+
+#temaInput {
+  width: 70%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+#buscarForm button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#buscarForm button:hover {
+  background-color: #1976d2;
+}
+
+#resultadoLista {
+  margin-top: 20px;
+}
+
+#resultadoLista li {
+  margin-bottom: 10px;
+}
+
+/* Estilos para el historial de navegación */
+#navigationHistoryContainer {
+  margin-top: 40px;
+}
+
+#navigationHistoryContainer ul {
+  border-top: 1px solid #ccc;
+  padding-top: 20px;
+}
+
+#navigationHistoryContainer li {
+  margin-bottom: 10px;
+}
+
+/* Estilos para enlaces de perfil */
+.profile-link {
+  color: #009688;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.profile-link:hover {
+  text-decoration: underline;
 }

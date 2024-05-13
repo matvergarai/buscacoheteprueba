@@ -21,8 +21,29 @@
   <!-- Formulario para agregar una nueva URL bloqueada -->
   <form id="addBlockedUrlForm">
     <input type="text" id="blockedUrlInput" placeholder="URL a bloquear">
-    <button type="submit">Bloquear URL</button>
+    <button type="submit" id="bloquearUrlBtn">Bloquear URL</button>
   </form>
+
+
+  <h1>Búsqueda por Tema</h1>
+
+  <form id="buscarForm">
+    <label for="temaInput">Tema:</label>
+    <input type="text" id="temaInput" name="tema">
+    <button type="submit">Buscar</button>
+  </form>
+
+  <h2>Resultados:</h2>
+  <ul id="resultadoLista">
+    <!-- Aquí se mostrarán los resultados de la búsqueda -->
+  </ul>
+
+  <h3>Historial de Navegación:</h3>
+<div id="navigationHistoryContainer">
+  <!-- Aquí se mostrará el historial de navegación para cada perfil -->
+</div>
+
+
 
   <!-- Script para manejar la lógica de la página -->
   <script src="panel.js"></script>

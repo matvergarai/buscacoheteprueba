@@ -42,7 +42,7 @@ const usuarioSchema = new mongoose.Schema({
   password: String,
    
   navigationProfiles: [navigationProfileSchema],
-   resetPasswordToken: { type: String, default: null } // Establecer un valor predeterminado
+   resetPasswordToken: { type: String, default: null } 
   
 });
 
@@ -273,6 +273,94 @@ app.post('/set-active-navigation-profile/:username/:profileName', async (req, re
   }
 });
 
+
+app.post('/add-navigation-history/:username/:profileName', async (req, res) => {
+  const { title, url } = req.body;
+  const { username, profileName } = req.params;
+
+  try {
+    const usuario = await Usuario.findOne({ username: username });
+    if (!usuario) {
+      res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+      return;
+    }
+
+    const profile = usuario.navigationProfiles.find(profile => profile.name === profileName);
+    if (!profile) {
+      res.status(404).json({ success: false, message: 'Perfil no encontrado' });
+      return;
+    }
+
+    // Agregar la visita al historial de navegación del perfil
+    profile.navigationHistory.push({ title: title, url: url });
+    await usuario.save();
+
+    res.json({ success: true, message: 'Visita agregada al historial de navegación' });
+  } catch (error) {
+    console.error('Error al agregar visita al historial de navegación:', error);
+    res.status(500).json({ success: false, message: 'Error al agregar visita al historial de navegación' });
+  }
+});
+
+// Ruta para obtener el historial de navegación de un perfil
+app.get('/get-navigation-history/:username/:profileName', async (req, res) => {
+  const { username, profileName } = req.params;
+
+  try {
+    // Buscar el usuario por su nombre de usuario
+    const usuario = await Usuario.findOne({ username: username });
+
+    if (!usuario) {
+      // Si no se encuentra el usuario, enviar respuesta con estado 404
+      return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+    }
+
+    // Buscar el perfil de navegación por su nombre en los perfiles del usuario
+    const profile = usuario.navigationProfiles.find(profile => profile.name === profileName);
+
+    if (!profile) {
+      // Si no se encuentra el perfil, enviar respuesta con estado 404
+      return res.status(404).json({ success: false, message: 'Perfil no encontrado' });
+    }
+
+    // Si se encuentra el perfil, devolver su historial de navegación
+    res.json({ success: true, navigationHistory: profile.navigationHistory });
+
+  } catch (error) {
+    // Si ocurre un error, enviar respuesta con estado 500
+    console.error('Error al obtener historial de navegación:', error);
+    res.status(500).json({ success: false, message: 'Error al obtener historial de navegación' });
+  }
+});
+
+// Ruta para eliminar una visita del historial de navegación de un perfil
+app.delete('/delete-navigation-history/:username/:profileName/:url', async (req, res) => {
+  const { username, profileName, url } = req.params;
+
+  try {
+    const usuario = await Usuario.findOne({ username: username });
+    if (!usuario) {
+      res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+      return;
+    }
+
+    const profile = usuario.navigationProfiles.find(profile => profile.name === profileName);
+    if (!profile) {
+      res.status(404).json({ success: false, message: 'Perfil no encontrado' });
+      return;
+    }
+
+    // Eliminar la visita del historial de navegación del perfil
+    profile.navigationHistory = profile.navigationHistory.filter(history => history.url !== url);
+    await usuario.save();
+
+    res.json({ success: true, message: 'Visita eliminada del historial de navegación' });
+  } catch (error) {
+    console.error('Error al eliminar visita del historial de navegación:', error);
+    res.status(500).json({ success: false, message: 'Error al eliminar visita del historial de navegación' });
+  }
+});
+
 // Ruta para desbloquear una URL
 app.post('/unblock-website/:username/:profileName', async (req, res) => {
   const { username, profileName } = req.params;
@@ -341,14 +429,21 @@ app.post('/reset-password/:token', (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
   
-  console.log("Token recibido en el servidor:", token); // Agrega este console.log para verificar el token recibido
-  console.log("Contraseña recibida en el servidor:", password); // Agrega este console.log para verificar la contraseña recibida
+  console.log("Token recibido en el servidor:", token);
+  console.log("Contraseña recibida en el servidor:", password);
 
-  Usuario.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } })
+  // Buscar el usuario por el token de restablecimiento
+  Usuario.findOne({ resetPasswordToken: token })
     .then(usuario => {
       if (!usuario) {
-        console.log("No se encontró ningún usuario con el token proporcionado o el token ha expirado.");
-        return res.status(400).json({ success: false, message: 'El enlace de restablecimiento es inválido o ha expirado' });
+        console.log("No se encontró ningún usuario con el token proporcionado.");
+        return res.status(400).json({ success: false, message: 'El enlace de restablecimiento es inválido' });
+      }
+
+      // Verificar si el token ha expirado
+      if (usuario.resetPasswordExpires < Date.now()) {
+        console.log("El token ha expirado.");
+        return res.status(400).json({ success: false, message: 'El enlace de restablecimiento ha expirado' });
       }
 
       // Actualizar la contraseña y borrar el token de restablecimiento
@@ -356,19 +451,19 @@ app.post('/reset-password/:token', (req, res) => {
       usuario.resetPasswordToken = undefined;
       usuario.resetPasswordExpires = undefined;
 
-      // Guardar cambios en la base de datos
+      // Guardar los cambios en la base de datos
       usuario.save()
         .then(() => {
           console.log("Contraseña restablecida correctamente.");
           res.json({ success: true, message: 'Contraseña restablecida exitosamente' });
         })
         .catch(error => {
-          console.error('Error al guardar los cambios en la base de datos:', error); // Agrega este console.error para identificar errores en el guardado del usuario
+          console.error('Error al guardar los cambios en la base de datos:', error);
           res.status(500).json({ success: false, message: 'Error al guardar los cambios en la base de datos' });
         });
     })
     .catch(error => {
-      console.error('Error al buscar usuario:', error); // Agrega este console.error para identificar errores en la búsqueda del usuario
+      console.error('Error al buscar usuario:', error);
       res.status(500).json({ success: false, message: 'Error al buscar usuario en la base de datos' });
     });
 });
@@ -376,6 +471,5 @@ app.post('/reset-password/:token', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en el puerto ${PORT}`);
 });
-
 
 

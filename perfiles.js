@@ -27,19 +27,39 @@ async function getActiveProfile(username) {
 }
 
 // Función para mostrar el mensaje de bienvenida con el perfil activo
+// Función para mostrar el mensaje de bienvenida con el perfil activo
+// Función para mostrar el mensaje de bienvenida con el perfil activo
 async function showWelcomeMessage() {
     const welcomeMessageElement = document.getElementById("welcomeMessage");
     if (welcomeMessageElement) {
         const currentUser = await getCurrentUser();
         const activeProfile = await getActiveProfile(currentUser);
+        
+        // Obtener el mensaje de "No hay perfiles activos"
+        const noActiveProfileMessage = document.getElementById("noActiveProfileMessage");
+        
         if (activeProfile && activeProfile.name) {
+            // Mostrar el mensaje de bienvenida con el perfil activo
             welcomeMessageElement.textContent = `Bienvenido, ${currentUser}! Perfil activo: ${activeProfile.name}`;
+            
+            // Ocultar el mensaje de "No hay perfiles activos"
+            if (noActiveProfileMessage) {
+                noActiveProfileMessage.style.display = "none";
+            }
         } else {
-            welcomeMessageElement.textContent = `Bienvenido, ${currentUser}! No hay ningún perfil activo.`;
+            // Mostrar el mensaje de bienvenida sin perfil activo
+            welcomeMessageElement.textContent = `Bienvenido, ${currentUser}! `;
+            
+            // Mostrar el mensaje de "No hay perfiles activos"
+            if (noActiveProfileMessage) {
+                noActiveProfileMessage.style.display = "block";
+            }
         }
     }
 }
 
+
+// Función para establecer el perfil activo
 async function setUserActiveProfile(currentUser, profile) {
     try {
         const response = await fetch(`http://localhost:3000/set-active-navigation-profile/${currentUser}/${profile.name}`, {
@@ -47,10 +67,28 @@ async function setUserActiveProfile(currentUser, profile) {
         });
         const data = await response.json();
         if (data.success) {
+            // Almacenar el perfil activo en el almacenamiento local de Chrome
+            chrome.storage.local.set({ "activeProfile": profile }, function() {
+                console.log("Perfil activo guardado en el almacenamiento local de Chrome:", profile);
+            });
+
             // Almacenar las URLs bloqueadas en el almacenamiento sincronizado de Chrome
             chrome.storage.sync.set({ blockedWebsites: data.blockedWebsites }, function() {
                 console.log("URLs bloqueadas guardadas en el almacenamiento sincronizado de Chrome");
             });
+
+            // Mostrar el perfil activo en el HTML
+            const profileStatusMessage = document.getElementById("profileStatusMessage");
+            if (profileStatusMessage) {
+                profileStatusMessage.textContent = `Perfil activo: ${profile.name}`;
+            }
+
+            // Llamar a showWelcomeMessage para actualizar el mensaje de bienvenida
+            await showWelcomeMessage();
+
+            // Capturar el historial de navegación
+            await captureNavigationHistory(profile);
+
             return true;
         } else {
             throw new Error(data.message);
@@ -60,6 +98,65 @@ async function setUserActiveProfile(currentUser, profile) {
         throw error;
     }
 }
+
+async function captureNavigationHistory(profile) {
+    // Lógica para capturar el historial de navegación
+    chrome.history.search({text: '', maxResults: 1000}, function(data) {
+        // `data` contiene un array de objetos con la información del historial
+        // Por cada objeto, puedes extraer la información relevante como URL y título
+        // y agregarla al historial de navegación del perfil activo
+        let newNavigationHistory = [];
+        data.forEach(item => {
+            newNavigationHistory.push({
+                url: item.url,
+                title: item.title
+            });
+        });
+
+        // Obtener el historial existente del almacenamiento local
+        chrome.storage.local.get("navigationHistory", function(result) {
+            let existingNavigationHistory = result.navigationHistory || [];
+
+            // Combinar historiales
+            let combinedHistory = existingNavigationHistory.concat(newNavigationHistory);
+
+            // Eliminar duplicados
+            combinedHistory = combinedHistory.filter((item, index, self) =>
+                index === self.findIndex(t => (
+                    t.url === item.url && t.title === item.title
+                ))
+            );
+
+            // Guardar el historial combinado en el almacenamiento local
+            chrome.storage.local.set({ "navigationHistory": combinedHistory }, function() {
+                console.log("Historial de navegación guardado en el almacenamiento local:", combinedHistory);
+            });
+        });
+    });
+}
+
+
+// Función para obtener el perfil activo desde el almacenamiento local de Chrome
+async function getActiveProfileFromStorage() {
+    return new Promise(resolve => {
+        chrome.storage.local.get("activeProfile", function(data) {
+            const activeProfile = data.activeProfile;
+            resolve(activeProfile); // Resuelve la promesa con el perfil activo
+        });
+    });
+}
+
+// Listener para el evento 'DOMContentLoaded' que se ejecuta cuando el DOM ha sido completamente cargado
+document.addEventListener('DOMContentLoaded', async function() {
+    // Llama a la función para obtener y mostrar el perfil activo al cargar la página
+    const activeProfile = await getActiveProfileFromStorage();
+    if (activeProfile) {
+        const profileStatusMessage = document.getElementById("profileStatusMessage");
+        if (profileStatusMessage) {
+            profileStatusMessage.textContent = `Perfil activo: ${activeProfile.name}`;
+        }
+    }
+});
 
 function clearBlockingRules() {
     chrome.declarativeNetRequest.getDynamicRules(function(rules) {
@@ -93,9 +190,7 @@ function getActiveBlockingRules(callback) {
 }
 
 // Ejemplo de uso:
-getActiveBlockingRules(function(rules) {
-    console.log("Reglas de bloqueo activas:", rules);
-});
+
 
 
 function getBlockingRules() {
@@ -134,6 +229,13 @@ async function showNavigationProfiles() {
 
     try {
         const navigationProfiles = await getNavigationProfiles(currentUser);
+        
+        // Verificar si hay perfiles de navegación
+        if (navigationProfiles.length === 0) {
+            navigationProfilesMessage.textContent = "No hay perfiles de navegación disponibles.";
+            return;
+        }
+
         navigationProfilesMessage.textContent = ""; // Limpiar el mensaje de error
 
         // Iterar sobre cada perfil de navegación y crear elementos para mostrarlos en la lista
@@ -213,6 +315,7 @@ async function showNavigationProfiles() {
     }
 }
 
+
 // Función para actualizar el nombre de un perfil de navegación
 async function updateProfileName(username, oldName, newName) {
     try {
@@ -227,6 +330,8 @@ async function updateProfileName(username, oldName, newName) {
         const data = await response.json();
         if (data.success) {
             console.log("Nombre de perfil actualizado exitosamente.");
+
+            await showWelcomeMessage();
             return true;
         } else {
             throw new Error(data.message);
@@ -247,6 +352,29 @@ async function deleteNavigationProfile(username, profileName) {
         const data = await response.json();
         if (data.success) {
             console.log("Perfil eliminado exitosamente.");
+
+            // Verificar si el perfil que se está eliminando es el perfil activo
+            const currentUser = await getCurrentUser();
+            const activeProfile = await getActiveProfile(currentUser);
+
+            if (activeProfile && activeProfile.name === profileName) {
+                // Si el perfil activo es el perfil eliminado, establece el perfil activo como null
+                await setUserActiveProfile(currentUser, null); // Establece el perfil activo como null
+                console.log("Perfil activo establecido como null.");
+            }
+
+            // Actualizar la lista de perfiles
+            await showNavigationProfiles();
+
+            // Verificar si el perfil activo ha sido eliminado y actualizar el mensaje de perfil activo
+            const activeProfileMessage = document.getElementById("profileStatusMessage");
+            if (activeProfileMessage) {
+                const currentActiveProfile = await getActiveProfileFromStorage();
+                if (!currentActiveProfile) {
+                    activeProfileMessage.textContent = "No hay perfil activo.";
+                }
+            }
+
             return true;
         } else {
             throw new Error(data.message);
@@ -256,6 +384,7 @@ async function deleteNavigationProfile(username, profileName) {
         throw error;
     }
 }
+
 
 
 // Función para agregar un nuevo perfil de navegación
@@ -291,14 +420,20 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Listener para el botón de agregar perfil
     const addProfileButton = document.getElementById('addProfileButton');
     addProfileButton.addEventListener('click', async function(event) {
-        const profileNameInput = document.getElementById('navigationProfileNameInput').value;
-        const currentUser = await getCurrentUser();
-        try {
-            await addNavigationProfile(currentUser, profileNameInput); // Agregar el nuevo perfil
-            await showNavigationProfiles(); // Actualizar la lista de perfiles de navegación
-        } catch (error) {
-            console.error("Error al agregar un nuevo perfil de navegación:", error);
-        }
+        const profileNameInput = document.getElementById('navigationProfileNameInput').value.trim();
+    if (!profileNameInput) {
+        console.error("El nombre del perfil no puede estar vacío");
+        return; // Detener la ejecución si el campo está vacío
+    }
+
+    const currentUser = await getCurrentUser();
+    try {
+        await addNavigationProfile(currentUser, profileNameInput); // Agregar el nuevo perfil
+        await showNavigationProfiles(); // Actualizar la lista de perfiles de navegación
+        await showWelcomeMessage(); // Mostrar el mensaje de bienvenida actualizado
+    } catch (error) {
+        console.error("Error al agregar un nuevo perfil de navegación:", error);
+    }
     });
 });
 
