@@ -1,66 +1,30 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Administración</title>
-  <link rel="stylesheet" type="text/css" href="./panel.css" media="screen" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <title>Panel de Bloqueo</title>
+  <link rel="stylesheet" href="panel.css">
 </head>
 <body>
-  <div id="app">
-    <div id="header-container">
-      <section class="header">
-        <h1>BuscaCohete URL Blocker</h1>
-        <h1 id="welcomeMessage">Bienvenido al panel de <span id="activeProfileName"></span></h1>
-      </section>
-    </div>
-    <div id="content-container">
-      <!-- Sección "Agregar a la lista de bloqueos" -->
-      <section class="add-block">
-        <h2>Agregar a la lista de bloqueos</h2>
-        <div class="main">
-          <input type="text" id="websiteInput"><button class="block" id="blockButton">Bloquear</button>
-        </div>
-      </section>
+  <h1>Panel de Bloqueo</h1>
 
-      <!-- Sección "Sitios Bloqueados" -->
-      <section class="remove-block">
-        <h2>Sitios Bloqueados</h2>
-        <div class="main" id="blockedWebsitesDiv">
-          <ul id="blockedWebsitesList"></ul>
-        </div>
-      </section>
+  <!-- Mostrar el nombre del perfil y el nombre de usuario -->
+  <h2 id="profileName"></h2>
 
-      <!-- Sección "Buscar URLs" -->
-      <section class="buscar-urls">
-        <h2>Buscar URLs</h2>
-        <div class="main">
-          <form id="buscar-formulario">
-            <label for="tema">Introduce el tema:</label>
-            <input type="text" id="tema" name="tema" required>
-            <button type="submit" id="buscarBtn">Buscar</button>
-          </form>
-          <div id="resultados"></div>
-        </div>
-      </section>
-      
-      <!-- Panel de Historial de Navegación -->
-      <section id="navigationHistory">
-        <h2>Historial de Navegación</h2>
-        <table id="historyTable">
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>URL</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </section>
-    </div>
-  </div>
-  <input type="hidden" id="perfilActual" value="">
-  <script src="./panel.js"></script>
+  <!-- Lista de URLs bloqueadas -->
+  <h3>URLs bloqueadas:</h3>
+  <ul id="blockedUrlsList">
+    <!-- Aquí se mostrarán las URLs bloqueadas -->
+  </ul>
+
+  <!-- Formulario para agregar una nueva URL bloqueada -->
+  <form id="addBlockedUrlForm">
+    <input type="text" id="blockedUrlInput" placeholder="URL a bloquear">
+    <button type="submit">Bloquear URL</button>
+  </form>
+
+  <!-- Script para manejar la lógica de la página -->
+  <script src="panel.js"></script>
 </body>
 </html>

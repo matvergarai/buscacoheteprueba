@@ -1,0 +1,41 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de la Búsqueda</title>
+    <style>
+        .resultados {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .url {
+            color: #0066CC;
+            font-weight: bold;
+        }
+        .titulo {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .descripcion {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resultados de la Búsqueda</h1>
+    {% for pagina in urls %}
+    <div class="resultados">
+        <p class="url">{{ pagina.url }}</p>
+        <h2 class="titulo">{{ pagina.titulo }}</h2>
+        <p class="descripcion">{{ pagina.descripcion }}</p>
+    </div>
+    {% endfor %}
+    <form action="/bloquear" method="post">
+        <label for="url">Introduce la URL que deseas bloquear:</label>
+        <input type="text" id="url" name="url">
+        <button type="submit">Bloquear</button>
+    </form>
+</body>
+</html>

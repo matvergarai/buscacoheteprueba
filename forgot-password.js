@@ -34,7 +34,7 @@ function showError(mensaje) {
 
 // Función para enviar la solicitud al servidor
 function enviarDatos(email) {
-    fetch('/forgot-password', {
+    fetch('http://localhost:8081/reset-password', { // Cambiar la URL a la nueva ruta
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

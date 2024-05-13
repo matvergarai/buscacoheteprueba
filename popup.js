@@ -1,11 +1,6 @@
 // Función para obtener el nombre de usuario actual
 async function getCurrentUser() {
-    return new Promise((resolve) => {
-        chrome.storage.sync.get("currentUser", function(data) {
-            const username = data.currentUser;
-            resolve(username);
-        });
-    });
+    return localStorage.getItem('currentUser');
 }
 
 // Función para guardar el nombre de usuario actual en el almacenamiento
@@ -95,12 +90,7 @@ function redirectToCreateProfilePageWithUser(profile) {
     chrome.tabs.create({ url: url });
 }
 // Función para establecer el perfil de usuario activo
-function setUserActiveProfile(userProfile) {
-    // Guardar el perfil de usuario en el almacenamiento sincronizado de Chrome
-    chrome.storage.sync.set({ activeProfile: userProfile }, function() {
-        console.log("Perfil de usuario activo establecido:", userProfile.username);
-    });
-}
+
 
 // Función para mostrar el perfil activo en el DOM
 async function showActiveProfile() {
@@ -137,9 +127,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // En el evento de DOMContentLoaded, agrega un escuchador al formulario de inicio de sesión
 document.getElementById('loginForm').addEventListener('submit', async function(event) {
-    event.preventDefault(); // Evita el envío del formulario por defecto
+    event.preventDefault(); // Evitar el envío del formulario por defecto
 
-    const username = document.getElementById('username').value;
+    const username = document.getElementById('username').value; // Obtener el valor del campo de nombre de usuario
+    console.log('Valor del campo de nombre de usuario:', username); // Agregar un console.log para depurar
+
     const password = document.getElementById('password').value;
 
     fetch('http://localhost:3000/login', {
@@ -152,22 +144,15 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     .then(response => response.json())
     .then(async function(data) {
         if (data.success) {
-            // Guarda el nombre de usuario en el almacenamiento local
-            chrome.storage.local.set({ 'currentUser': username }, function() {
-                console.log('Nombre de usuario guardado en el almacenamiento local:', username);
-            });
-
-            saveCurrentUser(username, async () => {
-                await addProfileForCurrentUser();
-                await setMostRecentActiveProfile(username);
-                chrome.tabs.create({ url: chrome.runtime.getURL(`perfiles.html?user=${username}`) });
-            });
+            // Redirigir a perfiles.html después de iniciar sesión exitosamente
+            window.open(`perfiles.html?user=${username}&currentUser=${username}`, '_blank');
         } else {
             document.getElementById('result').innerText = data.message;
         }
     })
     .catch(error => console.error('Error:', error));
 });
+
 
 // Función para obtener el perfil activo
 async function getActiveProfile(username) {
@@ -178,6 +163,37 @@ async function getActiveProfile(username) {
             resolve(activeProfile); // Resuelve la promesa con el perfil activo
         });
     });
+}
+
+async function addNavigationProfile(currentUser) {
+    try {
+        console.log("Usuario actual:", currentUser);
+
+        // Lógica para agregar un nuevo perfil de navegación
+        const newProfile = {
+            name: "Nuevo Perfil",
+            createdBy: currentUser, // Se asegura de que currentUser sea el nombre de usuario
+            navigationHistory: [],
+            blockedWebsitesArray: [] // Corregido de 'blockedWebsites' a 'blockedWebsitesArray'
+        };
+
+        console.log("Nuevo perfil de navegación a agregar:", newProfile);
+
+        // Obtener los perfiles existentes del usuario actual
+        let profiles = await getProfiles(currentUser);
+
+        // Verificar si el usuario ya tiene un perfil de navegación
+        if (profiles && profiles.length > 0) {
+            console.log("El usuario ya tiene un perfil de navegación existente:", profiles[0]);
+        } else {
+            // Si no tiene un perfil de navegación, creamos uno nuevo basado en el perfil de usuario y lo guardamos
+            profiles.push(newProfile);
+            await saveProfiles(currentUser, profiles);
+            console.log("Nuevo perfil de navegación creado para el usuario:", newProfile.username);
+        }
+    } catch (error) {
+        console.error("Error al agregar un nuevo perfil de navegación:", error);
+    }
 }
 
 // Función para establecer el perfil activo más reciente
@@ -265,3 +281,4 @@ function unblockURL(event) {
         });
     });
 }
+
